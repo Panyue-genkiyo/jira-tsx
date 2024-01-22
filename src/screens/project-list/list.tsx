@@ -26,11 +26,12 @@ interface ListProps extends TableProps<Project>{
 
 const List = ({ users, ...props }: ListProps) => {
 
-  const { mutate } = useEditProject();
+  // const { mutate } = useEditProject();
+  const { mutate } = useEditProject(); 
   // console.log(props.refresh)
 
   //函数柯里化， 先消耗id再消耗pin
-  const pinProject = (id: number) => (pin: boolean) => mutate({id, pin}).then(props.refresh)
+  // const pinProject = (id: number) => (pin: boolean) => mutate({id, pin}).then(props.refresh)
 
   //点击收藏之后，先更新收藏状态，再次请求
   
@@ -41,7 +42,7 @@ const List = ({ users, ...props }: ListProps) => {
       {
         title:  <Pin checked={true} disabled={true}/>,
         render(_, project){
-           return <Pin checked={project.pin} onCheckChange={pinProject(project.id)}/>
+           return <Pin checked={project.pin} onCheckChange={() => mutate({id: project.id, pin: !project.pin})}/>
         }
       }
       ,

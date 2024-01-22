@@ -6,6 +6,7 @@ import { Button, Card, Divider, Typography } from 'antd';
 import logo from '@/assets/logo.svg'
 import left from '@/assets/left.svg'
 import right from '@/assets/right.svg'
+import { ErrorBox } from '@/components/lib';
 
 const Unauthenticated = () => {
 
@@ -22,7 +23,8 @@ const Unauthenticated = () => {
           <Title>
             {isRegister ? '请注册' : '请登录'}
           </Title>
-          {error ? <Typography.Text style={{display:'inline-block',marginBottom: '2rem'}} type="danger">{error.message}</Typography.Text>: null}
+          {/* {error ? <Typography.Text style={{display:'inline-block',marginBottom: '2rem'}} type="danger">{error.message}</Typography.Text>: null} */}
+          <ErrorBox error={error}/>
           {isRegister ? <Register onError={setError}/> : <Login onError={setError}/>}
           <Divider/>
           <Button type={'link'} onClick={() => setIsRegister(!isRegister)}>{isRegister ? '已经有账号啦？直接登陆吧' : '没有账号？注册新账号'}</Button>  

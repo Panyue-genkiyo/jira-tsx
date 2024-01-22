@@ -51,3 +51,15 @@ export const FullPageErrorFallback = ({error}: {error: Error | null}) => (
 export const ButtonWitNoPadding = styled(Button)`
     padding: 0
 `
+
+
+//类型守卫
+const isError = (value: any): value is Error => value?.message; //当符合后面条件时value就是Error类型
+
+//只有当出现真正的error的时候才显示
+export const ErrorBox = ({error}: {error: unknown}) => {
+    if(isError(error)){
+       return  <Typography.Text type="danger">{error.message}xx</Typography.Text>
+    }
+    return null;
+}

@@ -6,7 +6,7 @@ import { Typography } from 'antd'
 import { useProjects } from '@/utils/project'
 import { useUsers } from '@/utils/user'
 import { useProjectModal, useProjectsSearchParams } from './util'
-import { ButtonWitNoPadding, Row } from '@/components/lib'
+import { ButtonWitNoPadding, ErrorBox, Row } from '@/components/lib'
 // import { useDispatch } from 'react-redux'
 // import { projectListAction } from '../../store/slices/project-list.slice'
 
@@ -14,7 +14,8 @@ export const ProjectList = () => {
   
   const [param, setParam] = useProjectsSearchParams();
 
-  const {isLoading, error, data: list, retry} = useProjects(useDebounce( param, 1000))
+ // const {isLoading, error, data: list, retry} = useProjects(useDebounce( param, 1000))
+  const {isLoading, error, data: list}  = useProjects(useDebounce(param, 1000))
 
   const {data: users} = useUsers()
   
@@ -33,8 +34,10 @@ export const ProjectList = () => {
         </ButtonWitNoPadding>
       </Row>
       <SearchPanel param={param} setParam={setParam}/>
-      {error ? <Typography.Text type="danger">{error.message}xx</Typography.Text> : null}
-      <List refresh={retry} loading={isLoading} dataSource={list || []} users={users || []} />
+      {/* {error ? <Typography.Text type="danger">{error.message}xx</Typography.Text> : null} */}
+      {/* <List refresh={retry} loading={isLoading} dataSource={list || []} users={users || []} /> */}
+      <ErrorBox error={error}/>
+      <List loading={isLoading} dataSource={list || []} users={users || []} />
     </Container>
   )
 }
