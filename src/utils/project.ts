@@ -1,9 +1,11 @@
+import { useProjectsSearchParams } from './../screens/project-list/util';
 import { useHttp } from "@/hooks/customHook";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { QueryKey, useMutation, useQuery, useQueryClient } from "react-query";
 import { useCallback, useEffect } from "react";
 import { useAsync } from "@/hooks/use-async";
 import { Project } from "@/screens/project-list/list";
 import { cleanObject } from ".";
+import { useEditConfig, useAddConfig, useDeleteConfig } from './use-optimistic';
 
 
 //获取project
@@ -32,9 +34,11 @@ export const useProjects = (params?: Partial<Project>) => {
 
 
 //编辑project
-export const useEditProject = () => {
+export const useEditProject = (queryKey: QueryKey, isInvalidateQueries?: boolean) => {
     const client = useHttp();
-    const queryClient = useQueryClient();
+    //const queryClient = useQueryClient();
+    // const [searchParam] = useProjectsSearchParams();
+    //const queryKey =  ['projects', useProjectsSearchParams()];
     // const { run, ...asyncRes } = useAsync();
     // const mutate = (params: Partial<Project>) => {
     //    return run(client(`projects/${params.id}`, {
@@ -47,29 +51,55 @@ export const useEditProject = () => {
     //     ...asyncRes
     // }
 
+    // console.log(queryKey)
+
     return useMutation((params: Partial<Project>) => {
+        // console.log(params)
         return client(`projects/${params.id}`, {
             method: 'PATCH',
             data: params
         })
-    }, {
-        onSuccess: () => queryClient.invalidateQueries('projects')
-    })
+    }, useEditConfig(queryKey))
 }
 
 
 //添加project
-export const useAddProject = () => {
+export const useAddProject = (queryKey: QueryKey) => {
     const client = useHttp();
-    const queryClient = useQueryClient();
     
    return useMutation((params: Partial<Project>) => {
-       return client(`project/${params.id}`, {
+       return client(`projects`, {
          data: params,
          method: 'POST'
        });
-   }, {
-    onSuccess: () => queryClient.invalidateQueries('projects')
-   })
+   }, useAddConfig(queryKey))
 
 }
+
+
+//删除某个project
+export const useDeleteProject = (queryKey: QueryKey) => {
+    const client = useHttp();
+    return useMutation(({id}: {id: number}) => {
+        return client(`projects/${id}`, {
+            method: 'DELETE'
+        })
+    }, 
+    useDeleteConfig(queryKey)
+    )
+}
+
+//获取某个详情project 根据projectId
+export const useProject = (id?: number) => {
+    const client = useHttp();
+    // const queryClient = useQueryClient();
+    
+    return useQuery<Project>(['project', {id}], () => {
+        return client(`projects/${id}`)
+    }, {
+        //在这种情况戏 只有当id不为undefine时才去触发详情， 否则不会再区执行该query
+        enabled: !!id
+    })
+}
+
+
