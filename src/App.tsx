@@ -1,26 +1,21 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+// import { ProjectList } from '@/screens/project-list'
+import Unauthenticated from "@/unauthenticated-app"
+import { useAuth } from "@/context/auth-context"
+import Authenticated from "@/authenticated-app";
+import { ErrorBoundary } from "@/components/error-boundary";
+import { FullPageErrorFallback } from "./components/lib";
 
-function App() {
+
+
+const App = () => {
+  const {user} = useAuth();
+  // return <ProjectList />
+  
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <ErrorBoundary fallbackRender={FullPageErrorFallback}>
+        {user ? <Authenticated/> : <Unauthenticated/>}
+    </ErrorBoundary>
+  )
 }
 
-export default App;
+export default App
