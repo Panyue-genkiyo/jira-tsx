@@ -1,14 +1,14 @@
-import { Dropdown, Table, TableProps } from 'antd'
+import { Dropdown, Modal, Table, TableProps } from 'antd'
 import { User } from './search-panel'
 import dayjs from 'dayjs'
  
 //react-router-dom 和 react-router 类似于 react-dom 和 react类似(react-router管理路由) react-router-dom是与dom宿主强关联的， 处理浏览器
 import { Link } from 'react-router-dom'
 import Pin from '@/components/pin'
-import { useEditProject } from '@/utils/project'
+import { useDeleteProject, useEditProject } from '@/utils/project'
 import { ButtonWitNoPadding } from '@/components/lib'
-import { useDispatch } from 'react-redux' 
-import { projectListAction } from '../../store/slices/project-list.slice'
+import { useProjectModal, useProjectQueryKey } from './util'
+import Project from '../project'
 
 export interface Project {
   id: number
@@ -27,22 +27,23 @@ interface ListProps extends TableProps<Project>{
 const List = ({ users, ...props }: ListProps) => {
 
   // const { mutate } = useEditProject();
-  const { mutate } = useEditProject(); 
+  const { mutate } = useEditProject(useProjectQueryKey()); 
   // console.log(props.refresh)
 
   //函数柯里化， 先消耗id再消耗pin
-  // const pinProject = (id: number) => (pin: boolean) => mutate({id, pin}).then(props.refresh)
+  const pinProject = (id: number) => (pin: boolean) => mutate({id, pin})
 
   //点击收藏之后，先更新收藏状态，再次请求
   
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch()
+
   
   return (
     <Table pagination={false} rowKey={pj => pj.id} columns={[
       {
         title:  <Pin checked={true} disabled={true}/>,
         render(_, project){
-           return <Pin checked={project.pin} onCheckChange={() => mutate({id: project.id, pin: !project.pin})}/>
+           return <Pin checked={project.pin} onCheckChange={pinProject(project.id)}/>
         }
       }
       ,
@@ -75,21 +76,49 @@ const List = ({ users, ...props }: ListProps) => {
       }
     },{
       render(_, project){
-        return <Dropdown menu={{
-           items: [
-             {
-                key: 'edit',
-                label: <ButtonWitNoPadding type="link" onClick={() => dispatch(projectListAction.openProjectModal())}>编辑</ButtonWitNoPadding>
-             },
-           ]
-        }}>
-           <ButtonWitNoPadding type={'link'}>...</ButtonWitNoPadding>
-        </Dropdown>
+         return <More project={project}/>
       }
     }
-    ]} {...props}>
+   ]} {...props}>
     </Table>
   )
+}
+
+
+const More = ({project}: {project: Project}) => {
+
+  const {startEdit} = useProjectModal();
+  const editProject = (id: number) => () => startEdit(id);
+  const { mutate: deleteProject } = useDeleteProject(useProjectQueryKey());
+
+  const confirmDeleteProject = (id: number) => {
+    Modal.confirm({
+       title: '确定删除这个项目吗',
+       content: '点击确定删除',
+       okText: '确定',
+       onOk(){
+         deleteProject({id:project.id})
+       }
+      })
+  } 
+
+   return (
+    <Dropdown menu={{
+      items: [
+        {
+           key: 'edit',
+          // label: <ButtonWitNoPadding type="link" onClick={() => dispatch(projectListAction.openProjectModal())}>编辑</ButtonWitNoPadding>
+          label: <ButtonWitNoPadding type="link" onClick={editProject(project.id)}>编辑</ButtonWitNoPadding>
+        },
+        {
+          key: 'delete',
+          label:  <ButtonWitNoPadding type="link" onClick={() => confirmDeleteProject(project.id)}>删除</ButtonWitNoPadding>  
+        }
+      ]
+   }}>
+      <ButtonWitNoPadding type={'link'}>...</ButtonWitNoPadding>
+   </Dropdown>
+   )
 }
 
 export default List
