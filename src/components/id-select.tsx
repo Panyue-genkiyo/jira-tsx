@@ -9,8 +9,8 @@ type SelectProps = React.ComponentProps<typeof Select>
 
 //用来选id的select
 interface IdSelectProps extends Omit<SelectProps, 'value' | 'onChange' | 'options'>{
-   value:  Raw | null | undefined
-   onChange: (value?: number) => void
+   value?:  Raw | null | undefined
+   onChange?: (value?: number) => void
    //默认值
    defaultOptionName?: string 
    options?: {
@@ -26,7 +26,7 @@ const IdSelect = (props: IdSelectProps) => {
   return (
     <Select 
     value={options?.length ? toNumber(value) : 0} 
-    onChange={value => onChange(toNumber(value) || undefined)}
+    onChange={value => onChange?.(toNumber(value) || undefined)}
     {...restProps}
     >
         {
